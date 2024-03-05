@@ -31,7 +31,8 @@ const PointsIcon = <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="
 
 
 const GamePage = () => {
-  const { players, realPlayer, sendMessage } = useWebSocket();
+  const { players, realPlayer, sendMessage, chatMessages } = useWebSocket();
+  const { overallRanking } = useGameContext();
   const [betPoints, setBetPoints] = useState(50);
   const [guess, setGuess] = useState(1.50);
   const [speed, setSpeed] = useState(1);
@@ -71,6 +72,7 @@ const GamePage = () => {
       console.error('No real player data available for placing bet.');
     }
   };
+
   const handleRegister = (name: string) => {
     console.log(name);
     sendMessage({
@@ -78,6 +80,16 @@ const GamePage = () => {
       name: name,
     });
   };
+
+  const handleSendMessage = (message) => {
+    if (message.trim()) {
+      sendMessage({
+        type: 'chatMessage',
+        data: { sender: "You", message: message }, // Assuming "You" is a placeholder for the actual sender's name
+      });
+    }
+  };
+
   return (
     <div className="bg-dark-900 text-white p-4 m-16">
       {/* Layout components */}
@@ -110,7 +122,7 @@ const GamePage = () => {
             <InfoCard label="Time" value={realPlayer ? <TimeDisplay /> : ''} icon={TimeIcon} />
             <InfoCard label="Points" value={`${realPlayer ? realPlayer.points : ''}`} icon={PointsIcon} />
           </div>
-          <div className='flex flex-row p-4'>
+          <div className='flex flex-row p-4 justify-center'>
             <MultiplierChart />
           </div>
           <div className='flex flex-row p-4 justify-center items-center'>
@@ -121,10 +133,10 @@ const GamePage = () => {
       {/* Bottom row */}
       <div className="flex flex-wrap -mx-2">
         <div className="w-full md:w-1/2 px-2">
-          <RankingTable players={players} />
+          <RankingTable rankings={overallRanking} />
         </div>
         <div className="w-full md:w-1/2 px-2">
-          {/* <ChatBox messages={chatMessages} onSendMessage={handleSendMessage} /> */}
+          <ChatBox messages={chatMessages} onSendMessage={handleSendMessage} />
         </div>
       </div>
     </div>

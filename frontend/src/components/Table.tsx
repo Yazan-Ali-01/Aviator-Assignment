@@ -11,6 +11,7 @@ const Table: React.FC<TableProps> = ({ title, headers, data }) => {
   if (!data) return null;
 
 
+
   const filledData = [...data];
   while (filledData.length < 5) {
     const placeholder = { name: '-', guess: '-', betPoints: '-', totalWinnings: '-', won: undefined };
@@ -20,6 +21,7 @@ const Table: React.FC<TableProps> = ({ title, headers, data }) => {
   const hasRanking = headers.includes("No.");
   const headerPropertyMapping = {
     "Name": "name",
+    "Player Name": "playerName",
     "Guess": "guess",
     "Points": "betPoints",
     "Score": "totalWinnings",
@@ -60,12 +62,22 @@ const Table: React.FC<TableProps> = ({ title, headers, data }) => {
         <tbody>
           {filledData.map((row, rowIndex) => (
             <tr key={rowIndex} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-              {headers.filter(header => header !== "No.").map((header, index) => {
-                return (
-                  <td key={index} className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-white" style={getCellStyle(row, !hasRanking)}>
-                    {renderCellValue(row, header)}
-                  </td>
-                );
+              {headers.map((header, index) => {
+                if (header === "No.") {
+                  // Handle "No." column specifically
+                  return (
+                    <td key={index} className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-white">
+                      {rowIndex + 1}
+                    </td>
+                  );
+                } else {
+                  // Handle other columns based on headerPropertyMapping
+                  return (
+                    <td key={index} className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-white" style={getCellStyle(row, !hasRanking)}>
+                      {renderCellValue(row, header)}
+                    </td>
+                  );
+                }
               })}
             </tr>
           ))}

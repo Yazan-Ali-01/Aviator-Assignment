@@ -46,7 +46,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children, 
         setPlayers(message.data.players);
         break;
       case 'chatMessage':
-        console.log(message.data.players);
+        console.log('test', message.data);
         setChatMessages(prevMessages => [...prevMessages, message.data]);
         break;
       case 'rankBoardUpdated':
