@@ -141,8 +141,6 @@ export class GameManager extends EventEmitter {
       const validation = isValidBet(player, betPoints);
       if (!validation.isValid) {
         errors.push(validation.message);
-        console.log(validation.message);
-        console.log('no valid bit');
         allBetsValid = false;
         continue;
       }
@@ -158,7 +156,6 @@ export class GameManager extends EventEmitter {
       console.log('tessd');
 
       this.emit('betErrors', { errors });
-      return;
     }
 
 
