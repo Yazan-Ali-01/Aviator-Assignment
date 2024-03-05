@@ -1,20 +1,13 @@
 import React from "react";
 import { TEChart } from "tw-elements-react";
 
-export default function ChartLine(): JSX.Element {
+// Wrap your component with React.memo
+const MutliplierChart = React.memo(() => {
   return (
     <TEChart
       type="line"
       data={{
-        labels: [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-          "Sunday",
-        ],
+        labels: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
         datasets: [
           {
             label: "Multiplier",
@@ -24,4 +17,6 @@ export default function ChartLine(): JSX.Element {
       }}
     />
   );
-}
+});
+
+export default MutliplierChart;

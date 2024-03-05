@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useWebSocket } from '../../contexts/WebSocketContext';
 
 const TimeDisplay = () => {
+
+  const { realPlayer } = useWebSocket();
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {

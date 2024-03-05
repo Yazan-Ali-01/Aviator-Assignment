@@ -11,8 +11,8 @@ import { ChatBox } from '../../components/ChatBox';
 import { generateRandomBetPoints, generateRandomGuess } from '../../utils/randoms';
 import InfoCard from '../../components/infoCard';
 import SpeedSlider from '../../components/SpeedSlider/SpeedSlider';
-import { MutliplierChart } from '../../components/MutliplierChart';
 import { TimeDisplay } from '../../components/TimeDisplay';
+import { MultiplierDisplay } from '../../components/MultiplierDisplay';
 
 const TimeIcon = <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
   <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -31,7 +31,7 @@ const PointsIcon = <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="
 
 
 const GamePage = () => {
-  const { players, realPlayer, sendMessage, multiplier } = useWebSocket();
+  const { players, realPlayer, sendMessage } = useWebSocket();
   const [betPoints, setBetPoints] = useState(50);
   const [guess, setGuess] = useState(1.50);
   const [speed, setSpeed] = useState(1);
@@ -107,14 +107,14 @@ const GamePage = () => {
         <div className="flex flex-col justify-between w-full lg:w-2/3 px-2">
           <div className='flex flex-row space-x-2'>
             <InfoCard label="Name" value={realPlayer ? realPlayer.name : ''} icon={PlayerIcon} />
-            <InfoCard label="Time" value={<TimeDisplay />} icon={TimeIcon} />
+            <InfoCard label="Time" value={realPlayer ? <TimeDisplay /> : ''} icon={TimeIcon} />
             <InfoCard label="Points" value={`${realPlayer ? realPlayer.points : ''}`} icon={PointsIcon} />
           </div>
           <div className='flex flex-row p-4'>
-            <MutliplierChart />
+            <MultiplierChart />
           </div>
           <div className='flex flex-row p-4 justify-center items-center'>
-            <span className='text-lg text-cyan-500 font-bold pt-4'>x {multiplier.toFixed(2)}</span>
+            <span className='text-lg text-cyan-500 font-bold pt-4'>x {<MultiplierDisplay />}</span>
           </div>
         </div>
       </div>
@@ -135,80 +135,3 @@ const GamePage = () => {
 
 export default GamePage;
 
-
-// <div className="game-page bg-dark-900 text-white min-h-screen p-4"> {/* Page padding */}
-//   <div className="flex mb-4"> {/* Top section with two columns */}
-
-//     {/* Left Column */}
-//     <div className="flex flex-col w-1/2 space-y-4 pr-2"> {/* Split width and padding between columns */}
-
-//       {/* Points and Multiplier Input */}
-//       <div className="flex">
-//         <div className="w-1/2 pr-2">
-//           {/* Points Input */}
-//           {/* Replace placeholder div with actual NumberInput component */}
-//           <NumberInput label="Points" ... />
-//         </div>
-//         <div className="w-1/2 pl-2">
-//           {/* Multiplier Input */}
-//           {/* Replace placeholder div with actual NumberInput component */}
-//           <NumberInput label="Multiplier" ... />
-//         </div>
-//       </div>
-
-//       {/* Start Bet Button */}
-//       <button className="w-full bg-red-500 text-white py-2 rounded-md">
-//         Start Bet
-//       </button>
-
-//       {/* Current Round Table */}
-//       <div className="w-full">
-//         <CurrentRoundTable bets={allBetsState} />
-//       </div>
-
-//       {/* Speed Slider */}
-//       <div className="w-full">
-//         {/* Replace placeholder div with actual SpeedSlider component */}
-//         <SpeedSlider ... />
-//       </div>
-//     </div>
-
-//     {/* Right Column */}
-//     <div className="flex flex-col w-1/2 space-y-4 pl-2">
-
-//       {/* Info Cards */}
-//       <div className="flex">
-//         <div className="w-1/3 pr-2">
-//           <InfoCard label="Name" value="Thomas" />
-//         </div>
-//         <div className="w-1/3 px-2">
-//           <InfoCard label="Points" value="1000" />
-//         </div>
-//         <div className="w-1/3 pl-2">
-//           <InfoCard label="Time" value="21:30" />
-//         </div>
-//       </div>
-
-//       {/* Chart */}
-//       <div className="w-full flex-grow">
-//         {/* Replace placeholder div with actual MultiplierChart component */}
-//         <MultiplierChart ... />
-//       </div>
-//     </div>
-
-//   </div>
-
-//   {/* Bottom section with two columns for Ranking Table and Chat Box */}
-//   <div className="flex mt-4"> {/* Bottom section padding and margin top */}
-//     <div className="w-1/2 pr-2">
-//       {/* Ranking Table */}
-//       {/* Replace placeholder div with actual RankingTable component */}
-//       <RankingTable players={players} />
-//     </div>
-//     <div className="w-1/2 pl-2">
-//       {/* Chat Box */}
-//       {/* Replace placeholder div with actual ChatBox component */}
-//       <ChatBox ... />
-//     </div>
-//   </div>
-// </div>
