@@ -1,7 +1,11 @@
 import Table from '../Table'; // Assuming you have this component
 
-const RankingTable = ({ players }) => (
-  <Table title="Ranking" headers={["No.", "Name", "Score"]} data={players} />
-);
+const RankingTable = ({ rankings }) => {
+
+  console.log(rankings);
+  return (
+    <Table title="Ranking" headers={["No.", "Player Name", "Score"]} data={rankings} />
+  )
+}
 
 export default RankingTable;

@@ -18,7 +18,6 @@ export interface UseWebSocketReturn {
 }
 
 export interface ChatMessage {
-
   sender: string;
   message: string;
 
