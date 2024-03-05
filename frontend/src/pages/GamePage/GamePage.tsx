@@ -1,174 +1,214 @@
-
-import React, { useEffect, useRef, useState } from 'react';
+// GamePage.jsx
+import React, { useEffect, useState } from 'react';
 import { useGameContext } from '../../contexts/GameContext';
-import { MutliplierChart } from '../../components/MutliplierChart';
-import NumberInput from '../../components/NumberInput';
-import Table from '../../components/Table';
-import SpeedSlider from '../../components/SpeedSlider/SpeedSlider';
 import { useWebSocket } from '../../contexts/WebSocketContext';
-import { generateRandomBetPoints, generateRandomGuess } from '../../utils/randoms';
+import { BetManagement } from '../../components/BetManagement';
+import { CurrentRoundTable } from '../../components/CurrentRoundTable';
+import { MultiplierChart } from '../../components/MultiPlierChart';
+import { PlayerRegistration } from '../../components/PlayerRegistration';
+import RankingTable from '../../components/RankingTable/RankingTable';
 import { ChatBox } from '../../components/ChatBox';
-import { WebSocketMessage } from '../../types/types';
+import { generateRandomBetPoints, generateRandomGuess } from '../../utils/randoms';
+import InfoCard from '../../components/infoCard';
+import SpeedSlider from '../../components/SpeedSlider/SpeedSlider';
+import { MutliplierChart } from '../../components/MutliplierChart';
+import { TimeDisplay } from '../../components/TimeDisplay';
+
+const TimeIcon = <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+</svg>
+
+const PlayerIcon = <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+</svg>
 
 
-const GamePage: React.FC = () => {
-  const { sendMessage, players, realPlayer, chatMessages, multiplier } = useWebSocket();
+const PointsIcon = <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 0 1 2.916.52 6.003 6.003 0 0 1-5.395 4.972m0 0a6.726 6.726 0 0 1-2.749 1.35m0 0a6.772 6.772 0 0 1-3.044 0" />
+</svg>
 
-  const handleSendMessage = (message: string) => {
-    const chatMessage: WebSocketMessage = {
-      type: 'chatMessage',
-      data: { sender: realPlayer?.name || "You", message },
-    };
 
-    sendMessage(chatMessage);
-  };
-  const { registerPlayer } = useGameContext();
 
+
+const GamePage = () => {
+  const { players, realPlayer, sendMessage, multiplier } = useWebSocket();
+  const [betPoints, setBetPoints] = useState(50);
+  const [guess, setGuess] = useState(1.50);
+  const [speed, setSpeed] = useState(1);
   const [allBetsState, setAllBetsState] = useState([]);
 
   useEffect(() => {
-    const tablePlayers = players.map(player => ({
-      name: player.name,
-      guess: player.guess,
-      betPoints: player.betPoints,
-      won: player.won
-    }));
-
-
-    setAllBetsState(tablePlayers);
+    setAllBetsState(players);
   }, [players]);
-  const [betPoints, setBetPoints] = useState<number>(50);
-  const [multiplierGuess, setMultiplierGuess] = useState<number>(1);
-  const [speed, setSpeed] = useState<number>(1);
 
-  console.log(multiplier);
-
-
-  const handleValueChange = (value: number, type: string) => {
-    if (type === 'Points') {
-      setBetPoints(value);
-    } else if (type === 'Multiplier') {
-      setMultiplierGuess(value);
-    }
-  };
-
-  const nameInputRef = useRef<HTMLInputElement>(null);
-  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-
-    const isDisabled = event.target.value.length < 3;
-    setIsButtonDisabled(isDisabled);
-  };
-
-  const handleSpeedChange = (newSpeed: number) => {
-    setSpeed(newSpeed);
-  };
-
-  const handleRegister = () => {
-    if (nameInputRef.current) {
-      const name = nameInputRef.current.value;
-      console.log(name)
-      if (name.length >= 3) {
-        registerPlayer(name);
-      }
-    }
-  };
-
-  const handlePlaceBet = () => {
-    const playerBet = {
-      name: realPlayer.name,
-      guess: multiplierGuess,
-      betPoints: betPoints,
-      speed: speed,
-    };
-
-
+  const handlePlaceBet = (betData) => {
     const autoPlayers = players.filter(player => player.isAuto);
-    const autoPlayersBets = autoPlayers.map(player => ({
-      name: player.name,
-      guess: generateRandomGuess(multiplierGuess),
-      betPoints: generateRandomBetPoints(player.points),
-      speed: speed,
+
+    const autoPlayerBets = autoPlayers.map(autoPlayer => ({
+      name: autoPlayer.name,
+      guess: generateRandomGuess(betData.guess),
+      betPoints: generateRandomBetPoints(autoPlayer.points),
+      speed: betData.speed,
     }));
 
+    // Create bet for the real player
+    if (realPlayer && realPlayer.name) {
+      const realPlayerBet = {
+        name: realPlayer.name,
+        guess: betData.guess,
+        betPoints: betData.betPoints,
+        speed: betData.speed,
+      };
 
-    const allBets = [playerBet, ...autoPlayersBets];
+      const allBets = [realPlayerBet, ...autoPlayerBets];
+      setAllBetsState(allBets)
 
-
-    const allBetsWithoutSpeed = allBets.map(({ speed, ...rest }) => rest);
-
-    setAllBetsState(allBetsWithoutSpeed);
-    console.log(allBetsWithoutSpeed);
-
-
+      sendMessage({
+        type: 'betAndGuess',
+        bets: allBets,
+      });
+    } else {
+      console.error('No real player data available for placing bet.');
+    }
+  };
+  const handleRegister = (name: string) => {
+    console.log(name);
     sendMessage({
-      type: 'betAndGuess',
-      bets: allBets,
+      type: 'registerPlayer',
+      name: name,
     });
   };
-
-
   return (
-    <div className='flex flex-col'>
-      <div className="flex w-full items-center justify-center bg-none ">
-        <div className="min-w-[80%] flex ">
-          <div className="w-4/12 flex-col justify-between mb-auto items-center space-y-4">
-            {realPlayer && realPlayer !== null ? (
-              <>
-                <div className='flex flex-row space-x-4'>
-                  <NumberInput text='Multiplier' type="Multiplier" onValueChange={handleValueChange} startFrom={1.00} increaseBy={0.25} />
-                  <NumberInput text='Points' type="Points" onValueChange={handleValueChange} startFrom={50} increaseBy={25} />
-                </div>
-
-                <button
-                  onClick={handlePlaceBet}
-                  type="button"
-                  className={`w-full focus:outline-none min-w-[300px] text-white bg-gradient-to-r from-rose-400 to-orange-400 hover:opacity-90 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900`}
-                >
-                  Start
-                </button>
-                <div className='flex flex-row space-x-4'>
-                  <Table title="Current Round" headers={["Name", "Guess", "Points"]} data={allBetsState} />
-                </div>
-                <SpeedSlider onSpeedChange={handleSpeedChange} />
-              </>
-            ) : (
-              <div className="flex flex-col items-center space-y-4">
-                <div className='min-w-[300px] space-y-4'>
-                  <label htmlFor="name" className="block mb-2 text-xs font-medium  dark:text-white/45 text-center">Please Insert Your Name</label>
-                  <input type="text" onChange={handleInputChange} ref={nameInputRef} id="name" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
-                </div>
-                <button
-                  onClick={handleRegister}
-                  type="button"
-                  disabled={isButtonDisabled}
-                  className={`focus:outline-none min-w-[300px] text-white bg-gradient-to-r from-rose-400 to-orange-400 hover:opacity-90 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900 ${isButtonDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  Accept
-                </button>
-
-              </div>
-            )}
+    <div className="bg-dark-900 text-white p-4 m-16">
+      {/* Layout components */}
+      <div className={`flex flex-wrap lg:flex-nowrap -mx-2 ${realPlayer ? 'items-start' : 'items-center'}`}>
+        {/* Left column */}
+        <div className="flex flex-col w-full lg:w-1/3 px-2 mb-4 space-y-2">
+          {!realPlayer ? (
+            // If there's no real player, show the registration component
+            <PlayerRegistration onRegister={handleRegister} />
+          ) : (
+            // Otherwise, show the BetManagement component and related components
+            <>
+              <BetManagement
+                speed={speed}
+                onPlaceBet={handlePlaceBet}
+                betPoints={betPoints}
+                setBetPoints={setBetPoints}
+                guess={guess}
+                setGuess={setGuess}
+              />
+              <CurrentRoundTable bets={allBetsState} />
+              <SpeedSlider value={speed} onSpeedChange={setSpeed} />
+            </>
+          )}
+        </div>
+        {/* Right column */}
+        <div className="flex flex-col justify-between w-full lg:w-2/3 px-2">
+          <div className='flex flex-row space-x-2'>
+            <InfoCard label="Name" value={realPlayer ? realPlayer.name : ''} icon={PlayerIcon} />
+            <InfoCard label="Time" value={<TimeDisplay />} icon={TimeIcon} />
+            <InfoCard label="Points" value={`${realPlayer ? realPlayer.points : ''}`} icon={PointsIcon} />
           </div>
-          <div className="w-8/12 justify-center items-center">
+          <div className='flex flex-row p-4'>
             <MutliplierChart />
-            <span className='text-white mx-auto'> Multiplier: {multiplier.toFixed(2)}x</span>
+          </div>
+          <div className='flex flex-row p-4 justify-center items-center'>
+            <span className='text-lg text-cyan-500 font-bold pt-4'>x {multiplier.toFixed(2)}</span>
           </div>
         </div>
       </div>
-      <div className="flex w-full items-center justify-center bg-none mt-4">
-        <div className="min-w-[80%] flex space-x-5">
-          <div className="w-7/12 ">
-            <Table title="Ranking" headers={["No.", "Name", "Score"]} data={players} />
-          </div>
-          <div className="w-5/12">
-            <ChatBox messages={chatMessages} onSendMessage={handleSendMessage} />
-          </div>
+      {/* Bottom row */}
+      <div className="flex flex-wrap -mx-2">
+        <div className="w-full md:w-1/2 px-2">
+          <RankingTable players={players} />
+        </div>
+        <div className="w-full md:w-1/2 px-2">
+          {/* <ChatBox messages={chatMessages} onSendMessage={handleSendMessage} /> */}
         </div>
       </div>
     </div>
+
   );
+
 };
 
 export default GamePage;
+
+
+// <div className="game-page bg-dark-900 text-white min-h-screen p-4"> {/* Page padding */}
+//   <div className="flex mb-4"> {/* Top section with two columns */}
+
+//     {/* Left Column */}
+//     <div className="flex flex-col w-1/2 space-y-4 pr-2"> {/* Split width and padding between columns */}
+
+//       {/* Points and Multiplier Input */}
+//       <div className="flex">
+//         <div className="w-1/2 pr-2">
+//           {/* Points Input */}
+//           {/* Replace placeholder div with actual NumberInput component */}
+//           <NumberInput label="Points" ... />
+//         </div>
+//         <div className="w-1/2 pl-2">
+//           {/* Multiplier Input */}
+//           {/* Replace placeholder div with actual NumberInput component */}
+//           <NumberInput label="Multiplier" ... />
+//         </div>
+//       </div>
+
+//       {/* Start Bet Button */}
+//       <button className="w-full bg-red-500 text-white py-2 rounded-md">
+//         Start Bet
+//       </button>
+
+//       {/* Current Round Table */}
+//       <div className="w-full">
+//         <CurrentRoundTable bets={allBetsState} />
+//       </div>
+
+//       {/* Speed Slider */}
+//       <div className="w-full">
+//         {/* Replace placeholder div with actual SpeedSlider component */}
+//         <SpeedSlider ... />
+//       </div>
+//     </div>
+
+//     {/* Right Column */}
+//     <div className="flex flex-col w-1/2 space-y-4 pl-2">
+
+//       {/* Info Cards */}
+//       <div className="flex">
+//         <div className="w-1/3 pr-2">
+//           <InfoCard label="Name" value="Thomas" />
+//         </div>
+//         <div className="w-1/3 px-2">
+//           <InfoCard label="Points" value="1000" />
+//         </div>
+//         <div className="w-1/3 pl-2">
+//           <InfoCard label="Time" value="21:30" />
+//         </div>
+//       </div>
+
+//       {/* Chart */}
+//       <div className="w-full flex-grow">
+//         {/* Replace placeholder div with actual MultiplierChart component */}
+//         <MultiplierChart ... />
+//       </div>
+//     </div>
+
+//   </div>
+
+//   {/* Bottom section with two columns for Ranking Table and Chat Box */}
+//   <div className="flex mt-4"> {/* Bottom section padding and margin top */}
+//     <div className="w-1/2 pr-2">
+//       {/* Ranking Table */}
+//       {/* Replace placeholder div with actual RankingTable component */}
+//       <RankingTable players={players} />
+//     </div>
+//     <div className="w-1/2 pl-2">
+//       {/* Chat Box */}
+//       {/* Replace placeholder div with actual ChatBox component */}
+//       <ChatBox ... />
+//     </div>
+//   </div>
+// </div>

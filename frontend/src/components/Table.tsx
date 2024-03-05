@@ -14,7 +14,7 @@ const Table: React.FC<TableProps> = ({ title, headers, data }) => {
   const filledData = [...data];
   while (filledData.length < 5) {
     const placeholder = { name: '-', guess: '-', betPoints: '-', totalWinnings: '-', won: undefined };
-    filledData.push(placeholder as Player);
+    filledData.push(placeholder as unknown as Player);
   }
 
   const hasRanking = headers.includes("No.");
