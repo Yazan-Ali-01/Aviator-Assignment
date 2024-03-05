@@ -58,12 +58,6 @@ export class GameManager extends EventEmitter {
     updateMultiplier();
   }
 
-
-  addPlayer(player: Player) {
-    this.state.players.push(player);
-    this.emit('playerAdded', { player });
-  }
-
   registerPlayer(playerName: string, startingPoints: number = 1000, registerAutoPlayers: boolean = true) {
     deleteJsonDb()
     let players = loadPlayerData();
@@ -125,7 +119,6 @@ export class GameManager extends EventEmitter {
     let errors = [];
     let validBets = [];
 
-    console.log(bets);
 
     for (let bet of bets) {
       const { name, guess, betPoints } = bet;

@@ -39,7 +39,7 @@ wss.on('connection', (ws) => {
 });
 
 gameManager.on('playersRegistered', (data) => {
-  broadcastToAllClients('playersRegistered', data);
+  broadcastToAllClients('playersRegistered', data.players);
 });
 
 
@@ -47,21 +47,20 @@ gameManager.on('multiplierUpdated', (data) => {
   broadcastToAllClients('multiplierUpdated', data);
 });
 
-gameManager.on('resultsCalculated', ({ players }) => {
-  broadcastToAllClients('roundEndedWithResults', { players });
+gameManager.on('resultsCalculated', (data) => {
+  broadcastToAllClients('roundEndedWithResults', data);
 });
 
-gameManager.on('rankBoardGenerated', ({ rankBoard }) => {
-  broadcastToAllClients('rankBoardUpdated', { rankBoard });
+gameManager.on('rankBoardGenerated', (data) => {
+  broadcastToAllClients('rankBoardUpdated', data);
 });
 
-gameManager.on('allBetsPlaced', ({ allPlayersBetInfo }) => {
-  broadcastToAllClients('allBetsPlaced', { allPlayersBetInfo });
+gameManager.on('allBetsPlaced', (data) => {
+  broadcastToAllClients('allBetsPlaced', data);
 });
 
 // Event Listeners for GameManager events
 gameManager.on('error', ({ playerName, message }) => {
-  const playerWs = playerConnections.get(playerName);
   broadcastToAllClients('error', JSON.stringify({ type: 'error', message }));
 });
 
@@ -79,11 +78,15 @@ function handleMessage(ws: WebSocket, message: string): void {
 
   switch (data.type) {
     case 'registerPlayer':
+      console.log(data);
+
       gameManager.registerPlayer(data.name, 1000, true);
       playerConnections.set(data.name, ws);
       break;
     case 'betAndGuess':
       const bets = Array.isArray(data.bets) ? data.bets : [data.bets];
+      console.log(bets, "data");
+
       gameManager.processBetsAndStartRound(bets)
       break;
     case 'chatMessage':
