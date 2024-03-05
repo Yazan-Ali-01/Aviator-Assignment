@@ -2,6 +2,7 @@ import { EventEmitter } from 'events';
 import { isValidNumber } from '../utils/isValidNumber';
 import { deleteJsonDb, loadPlayerData, savePlayerData } from '../utils/checkInfo';
 import { Player } from '../types/types';
+import { isValidBet } from '../utils/isValidBet';
 
 export interface GameState {
   multiplier: number;
@@ -117,25 +118,6 @@ export class GameManager extends EventEmitter {
     return !!players.find(player => player.name === playerName);
   }
 
-  isValidBet(player: Player, betPoints: number) {
-
-    if (typeof betPoints !== 'number') {
-      return { isValid: false, message: "Bet points must be a number." };
-    }
-
-
-    if (isNaN(betPoints) || betPoints <= 0 || !Number.isInteger(betPoints)) {
-      return { isValid: false, message: "Bet points must be a positive integer." };
-    }
-
-
-    if (player.points < betPoints) {
-      return { isValid: false, message: "Not enough points for the bet." };
-    }
-
-
-    return { isValid: true, message: "" };
-  }
 
 
   processBetsAndStartRound(bets: Array<{ name: string; guess: number; betPoints: number; speed: number }>) {
@@ -156,7 +138,7 @@ export class GameManager extends EventEmitter {
         continue;
       }
 
-      const validation = this.isValidBet(player, betPoints);
+      const validation = isValidBet(player, betPoints);
       if (!validation.isValid) {
         errors.push(validation.message);
         console.log(validation.message);
