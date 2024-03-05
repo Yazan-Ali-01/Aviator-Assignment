@@ -3,14 +3,13 @@ import './SpeedSlider.css'
 
 interface SpeedSliderProps {
   onSpeedChange: (value: number) => void;
+  value: number
 }
 
-const SpeedSlider = ({ onSpeedChange }: SpeedSliderProps) => {
-  const [value, setValue] = useState<number>(1);
+const SpeedSlider = ({ value, onSpeedChange }: SpeedSliderProps) => {
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const newValue = Number(event.target.value);
-    setValue(newValue);
     onSpeedChange(newValue);
   };
 

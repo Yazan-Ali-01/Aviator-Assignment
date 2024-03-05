@@ -14,7 +14,7 @@ const Table: React.FC<TableProps> = ({ title, headers, data }) => {
   const filledData = [...data];
   while (filledData.length < 5) {
     const placeholder = { name: '-', guess: '-', betPoints: '-', totalWinnings: '-', won: undefined };
-    filledData.push(placeholder as Player);
+    filledData.push(placeholder as unknown as Player);
   }
 
   const hasRanking = headers.includes("No.");
@@ -25,8 +25,13 @@ const Table: React.FC<TableProps> = ({ title, headers, data }) => {
     "Score": "totalWinnings",
   };
 
-  const renderCellValue = (value: number | string | null) => {
-    return value === '-' || value === null ? '-' : value;
+  const renderCellValue = (player, header) => {
+    if (header === "Points") {
+      // Check if the player has won and calculate points accordingly
+      return player.won ? `${player.betPoints * player.guess}` : player.betPoints;
+    }
+    // Handle other cell values normally
+    return player[headerPropertyMapping[header]] ?? '-';
   };
 
 
@@ -55,17 +60,10 @@ const Table: React.FC<TableProps> = ({ title, headers, data }) => {
         <tbody>
           {filledData.map((row, rowIndex) => (
             <tr key={rowIndex} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-              {hasRanking && (
-                <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-white">
-                  {rowIndex + 1}
-                </td>
-              )}
               {headers.filter(header => header !== "No.").map((header, index) => {
-                const propName = headerPropertyMapping[header];
-                const value = row[propName];
                 return (
                   <td key={index} className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-white" style={getCellStyle(row, !hasRanking)}>
-                    {renderCellValue(value)}
+                    {renderCellValue(row, header)}
                   </td>
                 );
               })}

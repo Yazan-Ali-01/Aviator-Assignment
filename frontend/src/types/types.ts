@@ -1,9 +1,7 @@
 
 export interface WebSocketMessage {
-  type: 'playersRegistered' | 'roundEndedWithResults' | 'betAndGuess' | 'chatMessage' | 'error' | 'multiplierUpdated';
-  data: any;
-  message?: string
-  bets?: any
+  type: 'playersRegistered' | 'registerPlayer' | 'rankBoardUpdated' | 'roundEndedWithResults' | 'betAndGuess' | 'chatMessage' | 'error' | 'multiplierUpdated';
+  [key: string]: any;
 }
 
 export interface Error {
@@ -47,16 +45,14 @@ export interface RankingEntry {
 }
 
 export interface GameContextType {
-  registerPlayer: (name: string) => void;
-  currentRoundResults: Player[];
-  setCurrentRoundResults: (results: Player[]) => void;
   overallRanking: RankingEntry[];
   setOverallRanking: (ranking: RankingEntry[]) => void;
+
 }
 
 export interface WebSocketContextType {
   sendMessage: (message: WebSocketMessage) => void;
-  players: Player[] | null
+  players: Player[]
   realPlayer: Player | null
   chatMessages: ChatMessage[]
   multiplier: number

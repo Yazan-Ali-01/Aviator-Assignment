@@ -1,6 +1,8 @@
+/* eslint-disable react-refresh/only-export-components */
 
-import React, { createContext, useContext, useEffect, useRef, ReactNode, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, ReactNode, useState, useCallback } from 'react';
 import { WebSocketContextType, WebSocketMessage, Player, ChatMessage } from '../types/types';
+import { useGameContext } from './GameContext';
 
 interface WebSocketProviderProps {
   children: ReactNode;
@@ -8,13 +10,14 @@ interface WebSocketProviderProps {
 }
 
 const WebSocketContext = createContext<WebSocketContextType>({
-  sendMessage: () => { console.warn("WebSocket not connected"); },
+  sendMessage: () => { console.warn("WebSocket not connected") },
   players: [],
   realPlayer: null,
   chatMessages: [{
     sender: '',
     message: ''
-  }]
+  }],
+  multiplier: 0
 });
 
 export const useWebSocket = () => useContext(WebSocketContext);
@@ -26,13 +29,44 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children, 
   const [errors, setErrors] = useState<string[]>([])
   const socketRef = useRef<WebSocket | null>(null);
   const [multiplier, setMultiplier] = useState<number>(1)
-  const realPlayer = players.find(player => !player.isAuto);
+  const { setOverallRanking } = useGameContext();
 
-  const handleError = (message: WebSocketMessage) => {
-    // Assuming message.data or message.message is the error message you want to display
-    const errorMessage = message.message || 'An unknown error occurred';
-    setErrors(prevErrors => [...prevErrors, errorMessage]);
-  };
+  const realPlayer = players?.find(player => !player.isAuto);
+
+
+  const handleMessage = useCallback((message: WebSocketMessage) => {
+    console.log("Received message:", message);
+    switch (message.type) {
+      case 'playersRegistered':
+        console.log(message);
+        setPlayers(message.data);
+        break;
+      case 'roundEndedWithResults':
+        console.log(message);
+        setPlayers(message.data.players);
+        break;
+      case 'chatMessage':
+        console.log(message.data.players);
+        setChatMessages(prevMessages => [...prevMessages, message.data]);
+        break;
+      case 'rankBoardUpdated':
+        setOverallRanking(message.data.rankBoard); // Update the context's overall ranking state
+        break;
+      case 'multiplierUpdated': {
+        console.log(message);
+        const { multiplier } = message.data; // Extract multiplier from message data
+        setMultiplier(multiplier); // Update multiplier state
+        break;
+      }
+      case 'error': {
+        const errorMessage = message.data.message || 'An unknown error occurred';
+        setErrors(prevErrors => [...prevErrors, errorMessage]);
+        break;
+      }
+      default:
+        console.log('Unhandled message type:', message.type);
+    }
+  }, [setOverallRanking]);
 
 
   useEffect(() => {
@@ -70,7 +104,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children, 
     return () => {
       socketRef.current?.close();
     };
-  }, [url]);
+  }, [handleMessage, url]);
 
   const sendMessage = (message: WebSocketMessage) => {
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
@@ -115,44 +149,20 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children, 
     };
   };
 
+
+
   useEffect(() => {
     const botMessageInterval = setInterval(() => {
       const botMessage = simulateBotMessage();
-      setChatMessages(prevMessages => [...prevMessages, botMessage]);
+      if (botMessage.type === 'chatMessage' && botMessage.data) {
+        setChatMessages(prevMessages => [...prevMessages, botMessage.data as ChatMessage]);
+      }
     }, 10000);
 
     return () => clearInterval(botMessageInterval);
   }, []);
 
-  const handleMessage = (message: WebSocketMessage) => {
-    console.log("Received message:", message);
-    switch (message.type) {
-      case 'playersRegistered':
-        setPlayers(message.data.players);
-        break;
-      case 'roundEndedWithResults':
-        console.log(message);
-        setPlayers(message.data.players);
-        break;
-      case 'chatMessage':
-        console.log(message.data);
-        setChatMessages(prevMessages => [...prevMessages, message.data]);
-        break;
-      case 'multiplierUpdated': {
-        console.log(message);
-        const { multiplier } = message.data; // Extract multiplier from message data
-        setMultiplier(multiplier); // Update multiplier state
-        break;
-      }
-      case 'error': {
-        const errorMessage = message.message || 'An unknown error occurred';
-        console.log(errorMessage)
-        break;
-      }
-      default:
-        console.log('Unhandled message type:', message.type);
-    }
-  };
+
 
   return (
     <WebSocketContext.Provider value={{ sendMessage, players, realPlayer, chatMessages, multiplier }}>
