@@ -90,7 +90,7 @@ function handleMessage(ws: WebSocket, message: string): void {
       gameManager.processBetsAndStartRound(bets)
       break;
     case 'chatMessage':
-      broadcastChatMessage(wss.clients, data);
+      broadcastChatMessage(wss.clients, data.data);
       break;
   }
 }
