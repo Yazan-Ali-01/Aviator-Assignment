@@ -1,7 +1,7 @@
 export type Player = {
   name: string; // Standardized to 'name'
   points: number;
-  guess: number | null;
+  guess: number;
   betPoints: number;
   isAuto: boolean;
   won?: boolean

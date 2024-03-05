@@ -1,0 +1,47 @@
+[
+  {
+    "name": "tazab",
+    "points": 1037.5,
+    "guess": 1.75,
+    "betPoints": 50,
+    "isAuto": false,
+    "totalWinnings": 87.5,
+    "won": true
+  },
+  {
+    "name": "AutoPlayer1",
+    "points": 634,
+    "guess": 3.75,
+    "betPoints": 366,
+    "isAuto": true,
+    "totalWinnings": 0,
+    "won": false
+  },
+  {
+    "name": "AutoPlayer2",
+    "points": 1335,
+    "guess": 1.5,
+    "betPoints": 670,
+    "isAuto": true,
+    "totalWinnings": 1005,
+    "won": true
+  },
+  {
+    "name": "AutoPlayer3",
+    "points": 1007,
+    "guess": 1.25,
+    "betPoints": 28,
+    "isAuto": true,
+    "totalWinnings": 35,
+    "won": true
+  },
+  {
+    "name": "AutoPlayer4",
+    "points": 1000,
+    "guess": 1,
+    "betPoints": 815,
+    "isAuto": true,
+    "totalWinnings": 815,
+    "won": true
+  }
+]
