@@ -65,7 +65,7 @@ export class GameManager extends EventEmitter {
 
   registerPlayer(playerName: string, startingPoints: number = 1000, registerAutoPlayers: boolean = true) {
     deleteJsonDb()
-    let players = loadPlayerData(); // Assuming this loads all player data
+    let players = loadPlayerData();
     let newlyRegisteredPlayers = [];
 
     if (players.find(player => player.name === playerName)) {
@@ -78,16 +78,16 @@ export class GameManager extends EventEmitter {
       points: startingPoints,
       guess: 0,
       betPoints: 0,
-      isAuto: false, // Main player is not an auto player
+      isAuto: false,
       totalWinnings: 0,
     };
 
     players.push(newPlayer);
-    newlyRegisteredPlayers.push(newPlayer); // Add the main player to the list of newly registered players
+    newlyRegisteredPlayers.push(newPlayer);
 
-    // Check if we should also register auto players
+
     if (registerAutoPlayers) {
-      const autoPlayerNames = ['AutoPlayer1', 'AutoPlayer2', 'AutoPlayer3', 'AutoPlayer4']; // Define your auto player names here
+      const autoPlayerNames = ['AutoPlayer1', 'AutoPlayer2', 'AutoPlayer3', 'AutoPlayer4'];
       autoPlayerNames.forEach(name => {
         const autoPlayer = {
           name: name,
@@ -97,17 +97,17 @@ export class GameManager extends EventEmitter {
           isAuto: true,
           totalWinnings: 0,
         };
-        // Ensure no duplicate auto players are created
+
         if (!players.find(player => player.name === autoPlayer.name)) {
           players.push(autoPlayer);
-          newlyRegisteredPlayers.push(autoPlayer); // Add each auto player to the list
+          newlyRegisteredPlayers.push(autoPlayer);
         }
       });
     }
 
-    savePlayerData(players); // Save all players, including auto players
+    savePlayerData(players);
 
-    // Emit a single event with all newly registered players
+
     this.emit('playersRegistered', { players });
   }
 
@@ -118,17 +118,17 @@ export class GameManager extends EventEmitter {
   }
 
   isValidBet(player: Player, betPoints: number) {
-    // Check if betPoints is a number
+
     if (typeof betPoints !== 'number') {
       return { isValid: false, message: "Bet points must be a number." };
     }
 
-    // Ensure betPoints is not NaN, negative, or a fractional value (if applicable)
+
     if (isNaN(betPoints) || betPoints <= 0 || !Number.isInteger(betPoints)) {
       return { isValid: false, message: "Bet points must be a positive integer." };
     }
 
-    // Check if the player has enough points
+
     if (player.points < betPoints) {
       return { isValid: false, message: "Not enough points for the bet." };
     }
@@ -143,7 +143,7 @@ export class GameManager extends EventEmitter {
     let errors = [];
     let allBetsValid = true;
 
-    // Iterate over bets to process each
+
     console.log(bets);
 
     for (let bet of bets) {
@@ -153,7 +153,7 @@ export class GameManager extends EventEmitter {
         errors.push(`Player ${name} does not exist.`);
         console.log('player doesnt exist');
         allBetsValid = false;
-        continue; // Move to the next bet if this one has issues
+        continue;
       }
 
       const validation = this.isValidBet(player, betPoints);
@@ -165,25 +165,25 @@ export class GameManager extends EventEmitter {
         continue;
       }
 
-      // Update player data for valid bets
+
       player.points -= betPoints;
       player.betPoints = betPoints;
       player.guess = guess;
     }
 
     if (!allBetsValid) {
-      // Handle errors, possibly by emitting an error event with collected messages
+
       console.log('tessd');
 
       this.emit('betErrors', { errors });
       return;
     }
 
-    // Save all player data after processing bets
+
     savePlayerData(players);
 
-    // Start a new round if all bets are valid
-    // Assuming the speed of the first bet is representative for simplicity
+
+
     const speed = bets[0].speed;
     this.startNewRound(speed);
   }
@@ -195,10 +195,10 @@ export class GameManager extends EventEmitter {
 
     players.forEach(player => {
       if (player.guess !== null && player.betPoints > 0 && finalMultiplier >= player.guess) {
-        // Player wins
-        const winnings = player.betPoints * player.guess; // Calculate winnings based on the final multiplier
-        player.points += winnings; // Update player's points with winnings
-        player.totalWinnings += winnings; // Increment total winnings by the amount won this round
+
+        const winnings = player.betPoints * player.guess;
+        player.points += winnings;
+        player.totalWinnings += winnings;
         player.won = true;
       } else {
         player.won = false;
