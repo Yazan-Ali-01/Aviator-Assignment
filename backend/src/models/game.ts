@@ -123,8 +123,7 @@ export class GameManager extends EventEmitter {
   processBetsAndStartRound(bets: Array<{ name: string; guess: number; betPoints: number; speed: number }>) {
     const players = loadPlayerData();
     let errors = [];
-    let allBetsValid = true;
-
+    let validBets = [];
 
     console.log(bets);
 
@@ -134,14 +133,12 @@ export class GameManager extends EventEmitter {
       if (!player) {
         errors.push(`Player ${name} does not exist.`);
         console.log('player doesnt exist');
-        allBetsValid = false;
         continue;
       }
 
       const validation = isValidBet(player, betPoints);
       if (!validation.isValid) {
         errors.push(validation.message);
-        allBetsValid = false;
         continue;
       }
 
@@ -149,23 +146,28 @@ export class GameManager extends EventEmitter {
       player.points -= betPoints;
       player.betPoints = betPoints;
       player.guess = guess;
+      validBets.push(bet);
     }
 
-    if (!allBetsValid) {
 
-      console.log('tessd');
-
+    if (errors.length > 0) {
+      console.log('Errors in some bets');
       this.emit('betErrors', { errors });
     }
 
+    // Check for no valid bets correctly
+    if (validBets.length === 0) {
+      console.log('No valid bets to start the round.'); // Ensure this message is logged for debugging.
+      errors.push('No valid bets to start the round.'); // Optionally accumulate this message if you want to emit it as well.
+      this.emit('betErrors', { errors }); // Optionally emit the error if you have handling for this case.
+      return; // Prevent the round from starting with no valid bets.
+    }
 
     savePlayerData(players);
-
-
-
-    const speed = bets[0].speed;
-    this.startNewRound(speed);
+    const speed = validBets[0].speed; // Assuming speed consistency, as mentioned.
+    this.startNewRound(speed);;
   }
+
 
 
   private calculateResults(): void {
