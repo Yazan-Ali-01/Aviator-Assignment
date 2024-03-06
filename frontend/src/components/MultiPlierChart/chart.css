@@ -1,0 +1,4 @@
+.chart-container {
+  height: 100%; /* or a specific height like 400px */
+  width: 100%; /* or a specific width like 100% */
+}

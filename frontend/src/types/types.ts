@@ -1,6 +1,6 @@
 
 export interface WebSocketMessage {
-  type: 'playersRegistered' | 'registerPlayer' | 'rankBoardUpdated' | 'roundEndedWithResults' | 'betAndGuess' | 'chatMessage' | 'error' | 'multiplierUpdated';
+  type: 'playersRegistered' | 'registerPlayer' | 'rankBoardUpdated' | 'roundEndedWithResults' | 'betAndGuess' | 'chatMessage' | 'error' | 'roundStarted' | 'multiplierUpdated';
   [key: string]: any;
 }
 
@@ -49,10 +49,17 @@ export interface GameContextType {
 
 }
 
+export interface MultiplierUpdate {
+  multiplier: number;
+  elapsed: number; // Assuming elapsed is a number representing seconds or milliseconds
+}
+
 export interface WebSocketContextType {
   sendMessage: (message: WebSocketMessage) => void;
   players: Player[]
   realPlayer: Player | null
   chatMessages: ChatMessage[]
   multiplier: number
+  isRoundActive: boolean
+  multiplierUpdates: MultiplierUpdate[]
 }

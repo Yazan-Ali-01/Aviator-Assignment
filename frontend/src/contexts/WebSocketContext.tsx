@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 
 import React, { createContext, useContext, useEffect, useRef, ReactNode, useState, useCallback } from 'react';
-import { WebSocketContextType, WebSocketMessage, Player, ChatMessage } from '../types/types';
+import { WebSocketContextType, WebSocketMessage, Player, ChatMessage, MultiplierUpdate } from '../types/types';
 import { useGameContext } from './GameContext';
 
 interface WebSocketProviderProps {
@@ -17,7 +17,12 @@ const WebSocketContext = createContext<WebSocketContextType>({
     sender: '',
     message: ''
   }],
-  multiplier: 0
+  multiplier: 0,
+  isRoundActive: false,
+  multiplierUpdates: [{
+    multiplier: 0,
+    elapsed: 0
+  }]
 });
 
 export const useWebSocket = () => useContext(WebSocketContext);
@@ -28,7 +33,9 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children, 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
   const [errors, setErrors] = useState<string[]>([])
   const socketRef = useRef<WebSocket | null>(null);
-  const [multiplier, setMultiplier] = useState<number>(1)
+  const [multiplier, setMultiplier] = useState<number>(0)
+  const [multiplierUpdates, setMultiplierUpdates] = useState<MultiplierUpdate[]>([]);
+  const [isRoundActive, setIsRoundActive] = useState<boolean>(false)
   const { setOverallRanking } = useGameContext();
 
   const realPlayer = players?.find(player => !player.isAuto);
@@ -44,6 +51,8 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children, 
       case 'roundEndedWithResults':
         console.log(message);
         setPlayers(message.data.players);
+        setMultiplierUpdates([]);
+        setIsRoundActive(false)
         break;
       case 'chatMessage':
         console.log('test', message.data);
@@ -52,10 +61,14 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children, 
       case 'rankBoardUpdated':
         setOverallRanking(message.data.rankBoard); // Update the context's overall ranking state
         break;
+      case 'roundStarted':
+        setIsRoundActive(message.data.isRoundActive); // Update the context's overall ranking state
+        break;
       case 'multiplierUpdated': {
         console.log(message);
-        const { multiplier } = message.data; // Extract multiplier from message data
-        setMultiplier(multiplier); // Update multiplier state
+        const { multiplier, elapsed } = message.data;
+        setMultiplier(multiplier);
+        setMultiplierUpdates(updates => [...updates, { multiplier, elapsed }]);
         break;
       }
       case 'error': {
@@ -163,9 +176,8 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children, 
   }, []);
 
 
-
   return (
-    <WebSocketContext.Provider value={{ sendMessage, players, realPlayer, chatMessages, multiplier }}>
+    <WebSocketContext.Provider value={{ sendMessage, players, realPlayer, chatMessages, multiplier, isRoundActive, multiplierUpdates }}>
       {children}
     </WebSocketContext.Provider>
   );

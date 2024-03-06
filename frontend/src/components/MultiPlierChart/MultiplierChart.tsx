@@ -1,73 +1,173 @@
-import React, { ReactNode } from 'react';
-import { animated, useSpring } from 'react-spring';
-import * as d3 from 'd3-shape';
-import { scaleLinear } from 'd3-scale';
+import React, { useEffect, useState } from 'react';
+import { Line } from 'react-chartjs-2';
+import 'chart.js/auto';
+import { Chart } from 'chart.js'
+import './chart.css';
+import { useWebSocket } from '../../contexts/WebSocketContext';
 
-const getPointAtLength = (length: number, pathNode: SVGPathElement | null) => {
-  if (!pathNode) return { x: 0, y: 0 };
-  const point = pathNode.getPointAtLength(length);
-  return { x: point.x, y: point.y };
-};
+// const initialChartData = () => {
+//   const data = [];
+//   // Create the flat part
+//   for (let x = 0; x <= 3; x += 0.1) { // Adjust the step for more or fewer points
+//     data.push({ x, y: 0 });
+//   }
 
-interface DataPoint {
-  time: number;
-  multiplier: number;
-}
-const MultiplierChart: React.FC = () => {
-  const data: DataPoint[] = [
-    { time: 0, multiplier: 1 },
-    // ... add more data points here
-    { time: 10, multiplier: 9.03 },
-  ];
+//   // Add the curved part (example with a simple quadratic curve for demonstration)
+//   for (let x = 3.1; x <= 10; x += 0.1) {
+//     const y = (x - 3) ** 2; // Simple quadratic curve for demonstration, adjust as needed
+//     data.push({ x, y });
+//   }
 
-  // Scales for your axes
-  const xScale = scaleLinear().domain([0, 10]).range([0, 750]); // Assuming 300 is the width of your chart
-  const yScale = scaleLinear().domain([1, 10]).range([402, 0]); // Assuming 150 is the height of your chart
+//   return data;
+// };
 
-  // Generate the line
-  const lineGenerator = d3.line()
-    .x(d => xScale(d.time))
-    .y(d => yScale(d.multiplier))
-    .curve(d3.curveBasis); // This makes the line a curve
+const multiplierRef = { value: 0 };
 
-  const pathData = lineGenerator(data);
 
-  // Spring animation for the line drawing
-  const spring = useSpring({
-    from: { x: 0 },
-    to: { x: 1 },
-    config: { duration: 5000 }, // Duration of your animation
+const MultiplierChart = () => {
+  const { isRoundActive, multiplierUpdates, multiplier } = useWebSocket();
+  useEffect(() => {
+    multiplierRef.value = multiplier;
+  }, [multiplier]);
+
+
+  const [roundKey, setRoundKey] = useState(0);
+
+  useEffect(() => {
+    Chart.register({
+      id: 'textOverlay',
+      beforeDraw: (chart) => {
+        const ctx = chart.ctx;
+        const { width, height } = chart.chartArea;
+        const x = width / 2;
+        const y = height / 2;
+
+        ctx.save();
+        ctx.font = '20px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#84cc16'; // Customize your text color
+        ctx.fillText(`${multiplierRef.value.toFixed(2).toString()} X`, x, y);
+        ctx.restore();
+      }
+    });
+
+
+  }, [multiplier])
+
+
+  // Initial chart state setup
+  const [chartData, setChartData] = useState({
+    datasets: [{
+      label: 'Multiplier',
+      data: [],
+      borderColor: 'rgb(242, 85, 81)',
+      tension: 0.1,
+      fill: false,
+      pointBackgroundColor: [],
+      pointRadius: []
+    }],
   });
 
-  const pathRef = React.useRef<SVGPathElement>(null);
+  useEffect(() => {
+    if (isRoundActive) {
+      // Reset chartData only when a new round is detected
+      setChartData({
+        datasets: [{
+          label: 'Multiplier',
+          data: [],
+          borderColor: 'rgb(242, 85, 81)',
+          tension: 0.1,
+          fill: false,
+          pointBackgroundColor: [],
+          pointRadius: []
+        }],
+      });
+    } else {
+      // When round is not active, prepare for a new round
+      setRoundKey(prevKey => prevKey + 1); // Increment key to force re-render
+    }
+  }, [isRoundActive]);
 
-  // Spring animation for the ball
-  const { length } = useSpring({
-    from: { length: 0 },
-    to: { length: 1000 },
-    config: { duration: 5000 },
-  });
+  const options = {
+    scales: {
+      x: {
+        type: 'linear',
+        position: 'bottom',
+        min: 0,
+        max: 10,
+        title: {
+          display: true,
+          text: 'Multiplier', // Keep this as is for a standard approach
+        },
+        ticks: {
+          stepSize: 1,
+        },
+        grid: {
+          display: false, // Add this line to hide the x-axis grid lines
+        },
+      },
+      y: {
+        display: true, // Set this to true to enable y-axis display
+        min: 0,
+        max: 10,
+        title: {
+          display: false, // Set this to false to hide the title
+          text: '', // Can be empty since it's hidden
+        },
+        ticks: {
+          display: false, // Hide the tick labels
+        },
+        grid: {
+          display: false, // Add this line to hide the x-axis grid lines
+        },
+      },
+    },
+    animation: {
+      duration: 0,
+    },
+    maintainAspectRatio: false,
+    responsive: true,
+  };
 
-  // Animated values for the ball's position
-  const ballStyle = length.to(l => {
-    const { x, y } = getPointAtLength(l, pathRef.current);
-    return {
-      transform: `translate(${x}px, ${y}px)`,
-    };
-  });
+  useEffect(() => {
+    if (isRoundActive) {
+      const modifiedData = multiplierUpdates.map(update => {
+        const y = (update.elapsed * update.elapsed) * 0.1;
+        return { x: update.elapsed, y: y };
+      });
+
+      // Check if modifiedData is not empty and then customize the last point
+      if (modifiedData.length > 0) {
+        // Example customization: Increase the radius of the last point
+        const pointRadius = new Array(modifiedData.length).fill(3); // Default radius for all points
+        pointRadius[modifiedData.length - 1] = 8; // Larger radius for the last point
+
+        // Example customization: Change background color of the last point
+        const pointBackgroundColor = new Array(modifiedData.length).fill('rgb(242, 85, 81)'); // Default color for all points
+        pointBackgroundColor[modifiedData.length - 1] = 'rgb(253, 182, 34)'; // Different color for the last point
+
+        setChartData({
+          datasets: [{
+            label: 'Multiplier',
+            data: modifiedData,
+            borderColor: 'rgb(242, 85, 81)',
+            tension: 0.1,
+            fill: false,
+            pointRadius: pointRadius, // Apply custom radius
+            pointBackgroundColor: pointBackgroundColor, // Apply custom background color
+          }],
+        });
+      }
+    }
+  }, [multiplierUpdates, isRoundActive]);
+
+
 
   return (
-    <svg width="770" height="402" className='mr-2 rounded-lg bg-[#1F2530]'>
-      <animated.path
-        d={pathData}
-        stroke="green"
-        strokeWidth="2"
-        fill="none"
-        strokeDasharray={1000} // Length of the dash array, should be long enough to cover the whole line
-        strokeDashoffset={spring.x.to(x => 1000 * (1 - x))} // Animate the dash offset from full length to 0
-      />
-      {/* You can add your animated ball here */}
-    </svg>
+    <div style={{ position: 'relative', height: '70vh', width: '100%' }}>
+      <Line data={chartData} options={options} />
+    </div>
   );
 };
 
