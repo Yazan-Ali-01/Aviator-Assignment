@@ -99,6 +99,7 @@ function handleMessage(ws: WebSocket, message: string): void {
       gameManager.processBetsAndStartRound(bets)
       break;
     case 'chatMessage':
+      console.log(data.data);
       broadcastChatMessage(wss.clients, data.data);
       break;
   }
