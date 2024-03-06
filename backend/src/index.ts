@@ -55,6 +55,15 @@ gameManager.on('rankBoardGenerated', (data) => {
   broadcastToAllClients('rankBoardUpdated', data);
 });
 
+gameManager.on('roundStarted', (data) => {
+  broadcastToAllClients('roundStarted', data);
+});
+
+gameManager.on('roundCompleted', (data) => {
+  broadcastToAllClients('roundCompleted', data);
+});
+
+
 gameManager.on('allBetsPlaced', (data) => {
   broadcastToAllClients('allBetsPlaced', data);
 });

@@ -32,8 +32,8 @@ export class GameManager extends EventEmitter {
   }
 
   private getRandomFinalMultiplier() {
-    const min = 2;
-    const max = 3;
+    const min = 6;
+    const max = 9;
     return Math.random() * (max - min) + min;
   }
 
@@ -41,6 +41,8 @@ export class GameManager extends EventEmitter {
     const finalMultiplier = this.getRandomFinalMultiplier();
     this.state.isRoundActive = true;
     this.state.multiplier = 0;
+    const roundStartTime = Date.now();
+    this.emit('roundStarted', { isRoundActive: this.state.isRoundActive, startTime: roundStartTime });
 
     const baseIncrement = 0.1;
     const increment = baseIncrement * speed;
@@ -48,7 +50,8 @@ export class GameManager extends EventEmitter {
     const updateMultiplier = () => {
       if (this.state.multiplier < finalMultiplier) {
         this.state.multiplier += increment;
-        this.emit('multiplierUpdated', { multiplier: this.state.multiplier });
+        const elapsed = (Date.now() - roundStartTime) / 1000; // Calculate elapsed time in seconds
+        this.emit('multiplierUpdated', { multiplier: this.state.multiplier, elapsed });
         setTimeout(updateMultiplier, 100);
       } else {
         this.endRound();
@@ -187,13 +190,17 @@ export class GameManager extends EventEmitter {
 
     const rankBoard = this.generateRankBoard(players);
     this.emit('rankBoardGenerated', { rankBoard });
+
+
+
   }
 
 
 
   endRound() {
-    this.state.isRoundActive = false;
     this.calculateResults();
+    this.state.isRoundActive = false;
+    this.emit('roundCompleted', { isRoundActive: this.state.isRoundActive });
   }
 
   private generateRankBoard(players: Player[]): RankBoardEntry[] {

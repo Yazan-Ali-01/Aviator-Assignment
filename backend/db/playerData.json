@@ -1,1 +1,47 @@
-[]
+[
+  {
+    "name": "adssa",
+    "points": 1025,
+    "guess": 1.5,
+    "betPoints": 50,
+    "isAuto": false,
+    "totalWinnings": 75,
+    "won": true
+  },
+  {
+    "name": "AutoPlayer1",
+    "points": 416,
+    "guess": 6.75,
+    "betPoints": 584,
+    "isAuto": true,
+    "totalWinnings": 0,
+    "won": false
+  },
+  {
+    "name": "AutoPlayer2",
+    "points": 4026.25,
+    "guess": 4.75,
+    "betPoints": 807,
+    "isAuto": true,
+    "totalWinnings": 3833.25,
+    "won": true
+  },
+  {
+    "name": "AutoPlayer3",
+    "points": 711,
+    "guess": 12.5,
+    "betPoints": 289,
+    "isAuto": true,
+    "totalWinnings": 0,
+    "won": false
+  },
+  {
+    "name": "AutoPlayer4",
+    "points": 1720,
+    "guess": 1.75,
+    "betPoints": 960,
+    "isAuto": true,
+    "totalWinnings": 1680,
+    "won": true
+  }
+]
