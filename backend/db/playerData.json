@@ -1,47 +1,47 @@
 [
   {
-    "name": "adssa",
-    "points": 1025,
-    "guess": 1.5,
-    "betPoints": 50,
+    "name": "Admin Ali",
+    "points": 2750,
+    "guess": 2,
+    "betPoints": 1000,
     "isAuto": false,
-    "totalWinnings": 75,
+    "totalWinnings": 3750,
     "won": true
   },
   {
     "name": "AutoPlayer1",
-    "points": 416,
-    "guess": 6.75,
-    "betPoints": 584,
+    "points": 889.25,
+    "guess": 7.25,
+    "betPoints": 53,
+    "isAuto": true,
+    "totalWinnings": 384.25,
+    "won": true
+  },
+  {
+    "name": "AutoPlayer2",
+    "points": 3,
+    "guess": 12.25,
+    "betPoints": 34,
     "isAuto": true,
     "totalWinnings": 0,
     "won": false
   },
   {
-    "name": "AutoPlayer2",
-    "points": 4026.25,
-    "guess": 4.75,
-    "betPoints": 807,
-    "isAuto": true,
-    "totalWinnings": 3833.25,
-    "won": true
-  },
-  {
     "name": "AutoPlayer3",
-    "points": 711,
-    "guess": 12.5,
-    "betPoints": 289,
+    "points": 864,
+    "guess": 11.5,
+    "betPoints": 136,
     "isAuto": true,
-    "totalWinnings": 0,
+    "totalWinnings": 939,
     "won": false
   },
   {
     "name": "AutoPlayer4",
-    "points": 1720,
-    "guess": 1.75,
-    "betPoints": 960,
+    "points": 1431.25,
+    "guess": 13.75,
+    "betPoints": 125,
     "isAuto": true,
-    "totalWinnings": 1680,
-    "won": true
+    "totalWinnings": 1001.25,
+    "won": false
   }
 ]

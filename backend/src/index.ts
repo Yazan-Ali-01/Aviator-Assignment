@@ -70,7 +70,11 @@ gameManager.on('allBetsPlaced', (data) => {
 
 // Event Listeners for GameManager events
 gameManager.on('error', ({ playerName, message }) => {
-  broadcastToAllClients('error', JSON.stringify({ type: 'error', message }));
+  broadcastToAllClients('error', { type: 'error', message });
+});
+
+gameManager.on('betErrors', ({ errors }) => {
+  broadcastToAllClients('betErrors', { type: 'betErrors', errors });
 });
 
 function broadcastToAllClients<T>(type: string, data: T) {
@@ -94,8 +98,6 @@ function handleMessage(ws: WebSocket, message: string): void {
       break;
     case 'betAndGuess':
       const bets = Array.isArray(data.bets) ? data.bets : [data.bets];
-      console.log(bets, "data");
-
       gameManager.processBetsAndStartRound(bets)
       break;
     case 'chatMessage':

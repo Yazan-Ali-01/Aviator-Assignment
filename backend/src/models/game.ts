@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import { isValidNumber } from '../utils/isValidNumber';
 import { deleteJsonDb, loadPlayerData, savePlayerData } from '../utils/checkInfo';
-import { Player } from '../types/types';
+import { BetType, Player } from '../types/types';
 import { isValidBet } from '../utils/isValidBet';
 
 export interface GameState {
@@ -117,51 +117,70 @@ export class GameManager extends EventEmitter {
 
 
 
-  processBetsAndStartRound(bets: Array<{ name: string; guess: number; betPoints: number; speed: number }>) {
+  processBetsAndStartRound(bets: BetType[]) {
     const players = loadPlayerData();
-    let errors = [];
-    let validBets = [];
+    const { validBets, errors } = this.validateBets(bets, players);
 
+    if (errors.length > 0) {
+      this.handleErrors(errors);
+      return;
+    }
+
+    this.updatePlayerData(players, validBets);
+    this.startRoundWithValidBets(validBets);
+  }
+
+  private validateBets(bets: BetType[], players: Player[]): { validBets: BetType[], errors: string[] } {
+    let errors: string[] = [];
+    let validBets: any = [];
 
     for (let bet of bets) {
-      const { name, guess, betPoints } = bet;
-      const player = players.find(p => p.name === name);
-      if (!player) {
+      const { name, betPoints } = bet;
+      const playerIndex = players.findIndex(p => p.name === name);
+      if (playerIndex === -1) {
         errors.push(`Player ${name} does not exist.`);
-        console.log('player doesnt exist');
         continue;
       }
 
-      const validation = isValidBet(player, betPoints);
+      const validation = isValidBet(players[playerIndex], betPoints);
       if (!validation.isValid) {
         errors.push(validation.message);
         continue;
       }
 
-
-      player.points -= betPoints;
-      player.betPoints = betPoints;
-      player.guess = guess;
       validBets.push(bet);
     }
 
 
-    if (errors.length > 0) {
-      console.log('Errors in some bets');
-      this.emit('betErrors', { errors });
-    }
+    return { validBets, errors };
+  }
 
-    // Check for no valid bets correctly
-    if (validBets.length === 0) {
-      console.log('No valid bets to start the round.'); // Ensure this message is logged for debugging.
-      errors.push('No valid bets to start the round.'); // Optionally accumulate this message if you want to emit it as well.
-      this.emit('betErrors', { errors }); // Optionally emit the error if you have handling for this case.
-      return; // Prevent the round from starting with no valid bets.
-    }
+  private handleErrors(errors: string[]) {
+    console.log('Errors in some bets');
+    this.emit('betErrors', { errors });
+  }
 
+  private updatePlayerData(players: Player[], validBets: BetType[]) {
+    validBets.forEach(bet => {
+      const { name, guess, betPoints } = bet;
+      const player = players.find(p => p.name === name);
+      if (player) { // Should always be true, but it's good to check
+        player.points -= betPoints;
+        player.betPoints = betPoints;
+        player.guess = guess;
+      }
+    });
     savePlayerData(players);
-    const speed = validBets[0].speed; // Assuming speed consistency, as mentioned.
-    this.startNewRound(speed);;
+  }
+
+  private startRoundWithValidBets(validBets: BetType[]) {
+    if (validBets.length === 0) {
+      console.log('No valid bets to start the round.');
+      return;
+    }
+
+    const speed = validBets[0].speed;
+    this.startNewRound(speed);
   }
 
 

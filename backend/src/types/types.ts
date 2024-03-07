@@ -8,6 +8,13 @@ export type Player = {
   totalWinnings: number;
 };
 
+export interface BetType {
+  name: string;
+  guess: number;
+  betPoints: number;
+  speed: number;
+}
+
 export interface GameState {
   multiplier: number;
   players: Player[];
