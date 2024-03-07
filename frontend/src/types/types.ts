@@ -1,6 +1,6 @@
 
 export interface WebSocketMessage {
-  type: 'playersRegistered' | 'registerPlayer' | 'rankBoardUpdated' | 'roundEndedWithResults' | 'betAndGuess' | 'chatMessage' | 'error' | 'roundStarted' | 'multiplierUpdated';
+  type: 'playersRegistered' | 'betErrors' | 'registerPlayer' | 'rankBoardUpdated' | 'roundEndedWithResults' | 'betAndGuess' | 'chatMessage' | 'error' | 'roundStarted' | 'multiplierUpdated';
   [key: string]: any;
 }
 

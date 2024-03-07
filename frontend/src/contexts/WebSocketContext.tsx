@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useRef, ReactNode, useState, useCallback } from 'react';
 import { WebSocketContextType, WebSocketMessage, Player, ChatMessage, MultiplierUpdate } from '../types/types';
 import { useGameContext } from './GameContext';
+import { toast } from 'react-toastify';
 
 interface WebSocketProviderProps {
   children: ReactNode;
@@ -31,7 +32,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children, 
   const [status, setStatus] = useState('disconnected');
   const [players, setPlayers] = useState<Player[]>([]);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
-  const [errors, setErrors] = useState<string[]>([])
   const socketRef = useRef<WebSocket | null>(null);
   const [multiplier, setMultiplier] = useState<number>(0)
   const [multiplierUpdates, setMultiplierUpdates] = useState<MultiplierUpdate[]>([]);
@@ -65,7 +65,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children, 
         setIsRoundActive(message.data.isRoundActive); // Update the context's overall ranking state
         break;
       case 'multiplierUpdated': {
-        console.log(message);
         const { multiplier, elapsed } = message.data;
         setMultiplier(multiplier);
         setMultiplierUpdates(updates => [...updates, { multiplier, elapsed }]);
@@ -73,7 +72,36 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children, 
       }
       case 'error': {
         const errorMessage = message.data.message || 'An unknown error occurred';
-        setErrors(prevErrors => [...prevErrors, errorMessage]);
+        const notify = () => {
+          toast(errorMessage, {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+        };
+        notify()
+        break;
+      }
+      case 'betErrors': {
+        console.log(message)
+        console.log('im herre')
+        const errorMessage = message.data.errors[0] || 'An unknown error occurred';
+        const notify = () => {
+          toast(errorMessage, {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+        };
+        notify()
         break;
       }
       default:

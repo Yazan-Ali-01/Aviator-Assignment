@@ -13,6 +13,7 @@ import InfoCard from '../../components/infoCard';
 import SpeedSlider from '../../components/SpeedSlider/SpeedSlider';
 import { TimeDisplay } from '../../components/TimeDisplay';
 import { MultiplierDisplay } from '../../components/MultiplierDisplay';
+import { toast } from 'react-toastify';
 
 const TimeIcon = <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
   <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -42,7 +43,25 @@ const GamePage = () => {
     setAllBetsState(players);
   }, [players]);
 
+
   const handlePlaceBet = (betData) => {
+
+    const isValidBet = (bet) => {
+      const player = players.find(p => p.name === bet.name);
+      if (!player) {
+        toast.error(`Player ${bet.name} does not exist.`);
+        return false;
+      }
+
+      if (bet.betPoints > player.points) {
+        toast.error(`Player ${bet.name} does not have enough points, maximum available bet for this player is ${player.points}`);
+        return false;
+      }
+
+
+      return true;
+    };
+
     const autoPlayers = players.filter(player => player.isAuto);
 
     const autoPlayerBets = autoPlayers.map(autoPlayer => ({
@@ -50,26 +69,28 @@ const GamePage = () => {
       guess: generateRandomGuess(betData.guess),
       betPoints: generateRandomBetPoints(autoPlayer.points),
       speed: betData.speed,
-    }));
+    })).filter(isValidBet); // Filter out invalid auto player bets
 
-    // Create bet for the real player
-    if (realPlayer && realPlayer.name) {
-      const realPlayerBet = {
-        name: realPlayer.name,
-        guess: betData.guess,
-        betPoints: betData.betPoints,
-        speed: betData.speed,
-      };
+    // Validate the real player's bet
+    const realPlayerBet = realPlayer && realPlayer.name ? {
+      name: realPlayer.name,
+      guess: betData.guess,
+      betPoints: betData.betPoints,
+      speed: betData.speed,
+    } : null;
 
+    if (realPlayerBet && isValidBet(realPlayerBet)) {
+      // Combine valid auto player bets with the real player's valid bet
       const allBets = [realPlayerBet, ...autoPlayerBets];
-      setAllBetsState(allBets)
+
+      setAllBetsState(allBets); // Update state with valid bets
 
       sendMessage({
         type: 'betAndGuess',
         bets: allBets,
       });
     } else {
-      console.error('No real player data available for placing bet.');
+      console.error('No real player data available for placing bet, or the bet is invalid.');
     }
   };
 
@@ -119,14 +140,11 @@ const GamePage = () => {
         <div className="flex flex-col justify-between w-full lg:w-2/3 px-2">
           <div className='flex flex-row space-x-2'>
             <InfoCard label="Name" value={realPlayer ? realPlayer.name : ''} icon={PlayerIcon} />
-            <InfoCard label="Time" value={realPlayer ? <TimeDisplay /> : ''} icon={TimeIcon} />
             <InfoCard label="Points" value={`${realPlayer ? realPlayer.points : ''}`} icon={PointsIcon} />
+            <InfoCard label="Time" value={realPlayer ? <TimeDisplay /> : ''} icon={TimeIcon} />
           </div>
           <div className='flex flex-row p-4 justify-center'>
             <MultiplierChart />
-          </div>
-          <div className='flex flex-row p-4 justify-center items-center'>
-            <span className='text-lg text-cyan-500 font-bold pt-4'>x {<MultiplierDisplay />}</span>
           </div>
         </div>
       </div>
