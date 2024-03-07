@@ -13,7 +13,7 @@ function App() {
         <div className="my-8 h-fit">
           <GamePage />
           <ToastContainer
-            position="bottom-center"
+            position="top-center"
             autoClose={3000}
             hideProgressBar={false}
             newestOnTop={false}

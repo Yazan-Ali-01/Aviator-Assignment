@@ -89,19 +89,8 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children, 
       case 'betErrors': {
         console.log(message)
         console.log('im herre')
-        const errorMessage = message.data.errors[0] || 'An unknown error occurred';
-        const notify = () => {
-          toast(errorMessage, {
-            position: "top-center",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-          });
-        };
-        notify()
+        const errorMessage = message.data.errors[-1] || 'An unknown error occurred';
+        toast.error(errorMessage)
         break;
       }
       default:
@@ -127,11 +116,11 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children, 
 
       ws.onclose = () => {
         console.log('WebSocket Disconnected');
-        setStatus('disconnected');
       };
 
       ws.onerror = (error) => {
         console.error('WebSocket Error:', error);
+        toast.error("Connection error. Please try again later.")
 
       };
 
