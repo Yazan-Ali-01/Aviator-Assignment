@@ -1,10 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import 'chart.js/auto';
+import type { ChartData, ChartOptions } from 'chart.js';
 import { Chart } from 'chart.js'
 import './chart.css';
 import { useWebSocket } from '../../contexts/WebSocketContext';
 
+
+interface LineProps {
+  options: ChartOptions<'line'>;
+  data: ChartData<'line'>;
+}
+
+const MyLineChart: React.FC<LineProps> = ({ options, data }) => {
+  return <Line options={options} data={data} />;
+};
 // const initialChartData = () => {
 //   const data = [];
 //   // Create the flat part
@@ -89,10 +99,10 @@ const MultiplierChart = () => {
     }
   }, [isRoundActive]);
 
-  const options = {
+  const options: ChartOptions<'line'> = {
     scales: {
       x: {
-        type: 'linear',
+        type: 'timeseries',
         position: 'bottom',
         min: 0,
         max: 10,
@@ -166,7 +176,7 @@ const MultiplierChart = () => {
 
   return (
     <div style={{ position: 'relative', height: '70vh', width: '100%' }}>
-      <Line data={chartData} options={options} />
+      <MyLineChart data={chartData} options={options} />
     </div>
   );
 };
