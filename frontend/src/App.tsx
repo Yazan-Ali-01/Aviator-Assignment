@@ -7,7 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import GamePage from "./pages/GamePage";
 
 function App() {
-  const WS_URL = process.env.VITE_WS_BACKEND_ENDPPOINT
+  const WS_URL = import.meta.env.VITE_WS_BACKEND_ENDPPOINT
   return (
     <GameProvider>
       <WebSocketProvider url={`ws://${WS_URL}`}>
