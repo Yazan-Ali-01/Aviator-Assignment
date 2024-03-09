@@ -12,7 +12,7 @@ function App() {
   console.log(WS_URL)
   return (
     <GameProvider>
-      <WebSocketProvider url={`wss://${WS_URL}`}>
+      <WebSocketProvider url={`ws://${WS_URL}`}>
         <div className="my-8 h-fit">
           <GamePage />
           <ToastContainer

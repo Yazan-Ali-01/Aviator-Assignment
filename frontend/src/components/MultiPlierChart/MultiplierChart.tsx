@@ -103,7 +103,7 @@ const MultiplierChart = () => {
   const options: ChartOptions<'line'> = {
     scales: {
       x: {
-        type: 'timeseries',
+        type: 'linear',
         position: 'bottom',
         min: 0,
         max: 10,
