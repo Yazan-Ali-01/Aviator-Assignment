@@ -7,9 +7,10 @@ import 'react-toastify/dist/ReactToastify.css';
 import GamePage from "./pages/GamePage";
 
 function App() {
+  const WS_URL = process.env.VITE_WS_BACKEND_ENDPPOINT
   return (
     <GameProvider>
-      <WebSocketProvider url="ws://localhost:3000">
+      <WebSocketProvider url={`ws://${WS_URL}`}>
         <div className="my-8 h-fit">
           <GamePage />
           <ToastContainer
