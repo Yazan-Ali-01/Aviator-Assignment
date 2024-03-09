@@ -3,6 +3,7 @@ import { Line } from 'react-chartjs-2';
 import 'chart.js/auto';
 import type { ChartData, ChartOptions } from 'chart.js';
 import { Chart } from 'chart.js'
+import 'chartjs-adapter-moment';
 import './chart.css';
 import { useWebSocket } from '../../contexts/WebSocketContext';
 
